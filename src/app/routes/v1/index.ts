@@ -3,6 +3,8 @@ import { AuthController } from "../../controllers/auth.controller";
 import { CompanyController } from "../../controllers/company.controller";
 import { TeamController } from "../../controllers/team.controller";
 import { ProjectController } from "../../controllers/project.controller";
+import { GithubController } from "../../controllers/github.controller";
+import { RepositoryController } from "../../controllers/repository.controller";
 
 const router = Express.Router();
 
@@ -25,5 +27,11 @@ router.get("/projects", ProjectController.getAll);
 router.get("/project/:id", ProjectController.getOne as any);
 router.put("/project/:id", ProjectController.update);
 router.delete("/project/:id", ProjectController.remove);
+
+router.get("/auth/github/login", GithubController.redirectToGithub);
+router.get("/auth/github/callback", GithubController.githubCallback);
+
+router.post("/repository", RepositoryController.create);
+router.get("/repository/:id", RepositoryController.getOne as any);
 
 export default router;
