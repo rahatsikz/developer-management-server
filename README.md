@@ -13,8 +13,6 @@
 
 ## ERD Diagram
 
-![ERD_Diagram](https://i.ibb.co.com/4Jmbnvg/image.png)
-
 ## Procedure to run the project
 
 At First, Clone the Repository

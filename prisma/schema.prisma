@@ -21,14 +21,134 @@ model MagicCode {
   @@map("magic_code")
 }
 
+/// A company using the DMS
+model Company {
+  id        String    @id @default(cuid())
+  name      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  teams     Team[]
+  projects  Project[]
+  users     User[]    @relation("CompanyUsers")
+}
+
+/// Teams within a company
+model Team {
+  id        String    @id @default(cuid())
+  name      String
+  company   Company   @relation(fields: [companyId], references: [id])
+  companyId String
+  members   User[]    @relation("TeamMembers")
+  projects  Project[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+/// Projects managed under teams
+model Project {
+  id          String      @id @default(cuid())
+  name        String
+  description String?
+  team        Team        @relation(fields: [teamId], references: [id])
+  teamId      String
+  company     Company     @relation(fields: [companyId], references: [id])
+  companyId   String
+  repo        Repository?
+  tasks       Task[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+}
+
+/// Users in the system
 model User {
-  id    String  @id @default(cuid())
-  email String  @unique
-  name  String?
-  role  String  @default("user")
+  id        String        @id @default(cuid())
+  email     String        @unique
+  name      String?
+  avatarUrl String?
+  role      UserRole      @default(MEMBER)
+  company   Company?      @relation("CompanyUsers", fields: [companyId], references: [id])
+  companyId String?
+  teams     Team[]        @relation("TeamMembers")
+  prs       PullRequest[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  Task      Task[]
+}
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+enum UserRole {
+  ADMIN
+  LEAD
+  MEMBER
+}
 
-  @@map("users")
+/// GitHub repository linked to a project
+model Repository {
+  id           String        @id @default(cuid())
+  githubId     Int           @unique
+  name         String
+  url          String
+  project      Project       @relation(fields: [projectId], references: [id])
+  projectId    String        @unique
+  branches     Branch[]
+  pullRequests PullRequest[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+/// Branches within a repository
+model Branch {
+  id           String        @id @default(cuid())
+  name         String
+  repo         Repository    @relation(fields: [repoId], references: [id])
+  repoId       String
+  pullRequests PullRequest[]
+  createdAt    DateTime      @default(now())
+}
+
+/// Pull Requests linked back to tasks
+model PullRequest {
+  id        String     @id @default(cuid())
+  githubId  Int        @unique
+  title     String
+  url       String
+  state     PRState    @default(OPEN)
+  author    User       @relation(fields: [authorId], references: [id])
+  authorId  String
+  repo      Repository @relation(fields: [repoId], references: [id])
+  repoId    String
+  branch    Branch?    @relation(fields: [branchId], references: [id])
+  branchId  String?
+  task      Task?      @relation(fields: [taskId], references: [id])
+  taskId    String?    @unique
+  mergedAt  DateTime?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+enum PRState {
+  OPEN
+  CLOSED
+  MERGED
+}
+
+/// Internal tasks in the DMS that map to GitHub PRs/issues
+model Task {
+  id          String       @id @default(cuid())
+  title       String
+  description String?
+  project     Project      @relation(fields: [projectId], references: [id])
+  projectId   String
+  assignee    User?        @relation(fields: [assigneeId], references: [id])
+  assigneeId  String?
+  status      TaskStatus   @default(OPEN)
+  pr          PullRequest?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+enum TaskStatus {
+  OPEN
+  IN_PROGRESS
+  REVIEW
+  DONE
 }
