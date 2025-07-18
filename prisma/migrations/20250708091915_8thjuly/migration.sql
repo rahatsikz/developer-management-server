@@ -1,9 +1,3 @@
-/*
-  Warnings:
-
-  - You are about to drop the `users` table. If the table is not empty, all the data it contains will be lost.
-
-*/
 -- CreateEnum
 CREATE TYPE "UserRole" AS ENUM ('ADMIN', 'LEAD', 'MEMBER');
 
@@ -13,8 +7,12 @@ CREATE TYPE "PRState" AS ENUM ('OPEN', 'CLOSED', 'MERGED');
 -- CreateEnum
 CREATE TYPE "TaskStatus" AS ENUM ('OPEN', 'IN_PROGRESS', 'REVIEW', 'DONE');
 
--- DropTable
-DROP TABLE "users";
+-- CreateTable
+CREATE TABLE "magic_code" (
+    "email" TEXT NOT NULL,
+    "code" TEXT NOT NULL,
+    "expires" TIMESTAMP(3) NOT NULL
+);
 
 -- CreateTable
 CREATE TABLE "Company" (
@@ -54,7 +52,7 @@ CREATE TABLE "Project" (
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
+    "name" TEXT,
     "avatarUrl" TEXT,
     "role" "UserRole" NOT NULL DEFAULT 'MEMBER',
     "companyId" TEXT,
@@ -126,6 +124,9 @@ CREATE TABLE "_TeamMembers" (
 
     CONSTRAINT "_TeamMembers_AB_pkey" PRIMARY KEY ("A","B")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "magic_code_email_key" ON "magic_code"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");

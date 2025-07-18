@@ -4,8 +4,8 @@ import { CompanyService } from "../services/company.service";
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { name } = req.body;
-    const company = await CompanyService.createCompany(name);
+    const { name, userId } = req.body;
+    const company = await CompanyService.createCompany(name, userId);
 
     res.status(httpStatus.CREATED).json({
       statusCode: httpStatus.CREATED,
@@ -24,11 +24,12 @@ const getOne = async (req: Request, res: Response, next: NextFunction) => {
     const company = await CompanyService.getCompanyById(id);
 
     if (!company) {
-      return res.status(httpStatus.NOT_FOUND).json({
+      res.status(httpStatus.NOT_FOUND).json({
         statusCode: httpStatus.NOT_FOUND,
         success: false,
         message: "Company not found",
       });
+      return;
     }
 
     res.status(httpStatus.OK).json({
@@ -69,4 +70,29 @@ const remove = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export const CompanyController = { create, getOne, update, remove };
+const getCompanyByUserId = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+    const company = await CompanyService.getCompanyByUserId(id);
+
+    res.status(httpStatus.OK).json({
+      statusCode: httpStatus.OK,
+      success: true,
+      data: company,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const CompanyController = {
+  create,
+  getOne,
+  update,
+  remove,
+  getCompanyByUserId,
+};

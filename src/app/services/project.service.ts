@@ -3,32 +3,58 @@ import prisma from "../../shared/prisma";
 
 const createProject = async (
   name: string,
-  description: string | null,
-  teamId: string,
-  companyId: string
+  companyId: string,
+  userId: string
 ): Promise<Project> => {
   return prisma.project.create({
-    data: { name, description, teamId, companyId },
+    data: { name, companyId, users: { connect: { id: userId } } },
   });
 };
 
 const getProjectById = async (id: string): Promise<Project | null> => {
   return prisma.project.findUnique({
     where: { id },
-    include: { team: true, company: true },
+    include: { company: true, users: true },
   });
 };
 
-const getAllProjects = async (): Promise<Project[]> => {
-  return prisma.project.findMany({ include: { team: true, company: true } });
+const getAllProjects = async (filters?: {
+  companyId?: string;
+  userId?: string;
+}): Promise<Project[]> => {
+  const { companyId, userId } = filters || {};
+  return prisma.project.findMany({
+    where: {
+      ...(companyId && { companyId }),
+      ...(userId && {
+        users: {
+          some: {
+            id: userId, // assuming user has many-to-many relation with project
+          },
+        },
+      }),
+    },
+    include: { company: true, users: true },
+  });
 };
 
 const updateProject = async (
   id: string,
-  name: string,
-  description: string | null
+  payload: {
+    name?: string;
+    userIds: string[];
+  }
 ): Promise<Project> => {
-  return prisma.project.update({ where: { id }, data: { name, description } });
+  const { name, userIds } = payload;
+  return prisma.project.update({
+    where: { id },
+    data: {
+      name,
+      users: {
+        connect: userIds.map((id) => ({ id })),
+      },
+    },
+  });
 };
 
 const deleteProject = async (id: string): Promise<Project> => {

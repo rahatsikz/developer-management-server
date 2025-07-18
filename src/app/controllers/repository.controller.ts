@@ -28,11 +28,12 @@ const getOne = async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
     const repo = await RepositoryService.getRepositoryById(id);
     if (!repo) {
-      return res.status(httpStatus.NOT_FOUND).json({
+      res.status(httpStatus.NOT_FOUND).json({
         statusCode: httpStatus.NOT_FOUND,
         success: false,
         message: "Repository not found",
       });
+      return;
     }
     res.status(httpStatus.OK).json({
       statusCode: httpStatus.OK,

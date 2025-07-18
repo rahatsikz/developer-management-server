@@ -27,36 +27,28 @@ model Company {
   name      String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  teams     Team[]
   projects  Project[]
   users     User[]    @relation("CompanyUsers")
 }
 
-/// Teams within a company
-model Team {
-  id        String    @id @default(cuid())
+/// A project within a company
+model Project {
+  id        String   @id @default(cuid())
   name      String
-  company   Company   @relation(fields: [companyId], references: [id])
+  company   Company  @relation(fields: [companyId], references: [id])
   companyId String
-  members   User[]    @relation("TeamMembers")
-  projects  Project[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  users     User[]   @relation("members")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-/// Projects managed under teams
-model Project {
-  id          String      @id @default(cuid())
-  name        String
-  description String?
-  team        Team        @relation(fields: [teamId], references: [id])
-  teamId      String
-  company     Company     @relation(fields: [companyId], references: [id])
-  companyId   String
-  repo        Repository?
-  tasks       Task[]
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+model Space {
+  id        String      @id @default(cuid())
+  name      String
+  repo      Repository?
+  tasks     Task[]
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 }
 
 /// Users in the system
@@ -66,13 +58,12 @@ model User {
   name      String?
   avatarUrl String?
   role      UserRole      @default(MEMBER)
-  company   Company?      @relation("CompanyUsers", fields: [companyId], references: [id])
-  companyId String?
-  teams     Team[]        @relation("TeamMembers")
+  company   Company[]     @relation("CompanyUsers")
   prs       PullRequest[]
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
   Task      Task[]
+  Project   Project[]     @relation("members")
 }
 
 enum UserRole {
@@ -87,8 +78,8 @@ model Repository {
   githubId     Int           @unique
   name         String
   url          String
-  project      Project       @relation(fields: [projectId], references: [id])
-  projectId    String        @unique
+  space        Space         @relation(fields: [spaceId], references: [id])
+  spaceId      String        @unique
   branches     Branch[]
   pullRequests PullRequest[]
   createdAt    DateTime      @default(now())
@@ -136,8 +127,8 @@ model Task {
   id          String       @id @default(cuid())
   title       String
   description String?
-  project     Project      @relation(fields: [projectId], references: [id])
-  projectId   String
+  space       Space        @relation(fields: [spaceId], references: [id])
+  spaceId     String
   assignee    User?        @relation(fields: [assigneeId], references: [id])
   assigneeId  String?
   status      TaskStatus   @default(OPEN)

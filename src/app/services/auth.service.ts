@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import prisma from "../../shared/prisma";
-import { sendLoginCode } from "../../helpers/sendEmail";
+import { sendInviteEmail, sendLoginCode } from "../../helpers/sendEmail";
 import ApiError from "../../errors/ApiError";
 import httpStatus from "http-status";
 import { jwtHelpers } from "../../helpers/jwtHelpers";
@@ -21,7 +21,7 @@ const requestCode = async (email: string) => {
   return result;
 };
 
-const verifyCode = async (email: string, code: string) => {
+const verifyCode = async (email: string, code: string, companyId: string) => {
   const record = await prisma.magicCode.findUnique({ where: { email } });
 
   if (!record || record.code !== code || record.expires < new Date()) {
@@ -32,16 +32,60 @@ const verifyCode = async (email: string, code: string) => {
 
   let user = await prisma.user.findUnique({ where: { email } });
   if (!user) {
-    user = await prisma.user.create({ data: { email } });
+    user = await prisma.user.create({
+      data: {
+        email,
+        ...(companyId && {
+          company: {
+            connect: { id: companyId },
+          },
+        }),
+      },
+    });
   }
 
-  const token = jwtHelpers.createToken(
+  const accessToken = jwtHelpers.createToken(
     { id: user.id },
     config.jwt.secret as Secret,
     config.jwt.expires_in as string
   );
+  const refreshToken = jwtHelpers.createToken(
+    { id: user.id },
+    config.jwt.refresh_secret as Secret,
+    config.jwt.refresh_expires_in as string
+  );
 
-  return token;
+  return {
+    accessToken,
+    refreshToken,
+    user,
+  };
 };
 
-export const AuthService = { requestCode, verifyCode };
+const inviteEmployee = async (emails: string[], companyId: string) => {
+  const existingUsers = await prisma.user.findMany({
+    where: {
+      email: {
+        in: emails,
+      },
+    },
+    select: {
+      email: true,
+    },
+  });
+
+  const existingEmails = new Set(existingUsers.map((u) => u.email));
+
+  // 2. Filter out existing emails
+  const newEmails = emails.filter((email) => !existingEmails.has(email));
+  for (const email of newEmails) {
+    sendInviteEmail(email, companyId);
+  }
+
+  return {
+    invited: newEmails,
+    skipped: Array.from(existingEmails),
+  };
+};
+
+export const AuthService = { requestCode, verifyCode, inviteEmployee };

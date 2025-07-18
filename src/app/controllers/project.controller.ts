@@ -4,13 +4,8 @@ import { ProjectService } from "../services/project.service";
 
 const create = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { name, description, teamId, companyId } = req.body;
-    const project = await ProjectService.createProject(
-      name,
-      description,
-      teamId,
-      companyId
-    );
+    const { name, userId, companyId } = req.body;
+    const project = await ProjectService.createProject(name, companyId, userId);
     res.status(httpStatus.CREATED).json({
       statusCode: httpStatus.CREATED,
       success: true,
@@ -26,12 +21,14 @@ const getOne = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
     const project = await ProjectService.getProjectById(id);
-    if (!project)
-      return res.status(httpStatus.NOT_FOUND).json({
+    if (!project) {
+      res.status(httpStatus.NOT_FOUND).json({
         statusCode: httpStatus.NOT_FOUND,
         success: false,
         message: "Project not found",
       });
+      return;
+    }
     res
       .status(httpStatus.OK)
       .json({ statusCode: httpStatus.OK, success: true, data: project });
@@ -42,7 +39,11 @@ const getOne = async (req: Request, res: Response, next: NextFunction) => {
 
 const getAll = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const projects = await ProjectService.getAllProjects();
+    const { companyId, userId } = req.query;
+    const projects = await ProjectService.getAllProjects({
+      companyId: companyId as string,
+      userId: userId as string,
+    });
     res
       .status(httpStatus.OK)
       .json({ statusCode: httpStatus.OK, success: true, data: projects });
@@ -54,8 +55,8 @@ const getAll = async (req: Request, res: Response, next: NextFunction) => {
 const update = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
-    const { name, description } = req.body;
-    const updated = await ProjectService.updateProject(id, name, description);
+    const payload = req.body;
+    const updated = await ProjectService.updateProject(id, payload);
     res.status(httpStatus.OK).json({
       statusCode: httpStatus.OK,
       success: true,
