@@ -14,7 +14,7 @@ const createProject = async (
 const getProjectById = async (id: string): Promise<Project | null> => {
   return prisma.project.findUnique({
     where: { id },
-    include: { company: true, users: true },
+    include: { company: true, users: true, Spaces: true },
   });
 };
 
@@ -34,7 +34,7 @@ const getAllProjects = async (filters?: {
         },
       }),
     },
-    include: { company: true, users: true },
+    include: { company: true, users: true, Spaces: true },
   });
 };
 

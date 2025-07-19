@@ -35,7 +35,7 @@ const deleteCompany = async (id: string): Promise<Company> => {
 const getCompanyByUserId = async (userId: string) => {
   const isUserExit = await prisma.user.findUnique({
     where: { id: userId },
-    include: { company: true },
+    include: { Company: true },
   });
   if (!isUserExit) return null;
 
@@ -43,7 +43,7 @@ const getCompanyByUserId = async (userId: string) => {
     where: {
       users: { some: { id: userId } },
     },
-    include: { users: true },
+    include: { users: true, projects: true },
   });
 
   return companies;

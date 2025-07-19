@@ -4,6 +4,8 @@ import { CompanyController } from "../../controllers/company.controller";
 import { ProjectController } from "../../controllers/project.controller";
 import { GithubController } from "../../controllers/github.controller";
 import { RepositoryController } from "../../controllers/repository.controller";
+import { authenticate } from "../../middlewares/auth";
+import { SpaceController } from "../../controllers/space.controller";
 
 const router = Express.Router();
 
@@ -11,6 +13,8 @@ router.post("/auth/request-code", AuthController.requestCode);
 router.post("/auth/verify-code", AuthController.verifyCode);
 router.post("/auth/logout", AuthController.logout);
 router.post("/auth/invite-employee", AuthController.inviteEmployee);
+router.get("/profile/me", authenticate, AuthController.getProfile);
+router.put("/profile/update", authenticate, AuthController.updateUserProfile);
 
 router.post("/company", CompanyController.create);
 router.get("/company/:id", CompanyController.getOne);
@@ -23,6 +27,12 @@ router.get("/projects", ProjectController.getAll);
 router.get("/project/:id", ProjectController.getOne);
 router.put("/project/:id", ProjectController.update);
 router.delete("/project/:id", ProjectController.remove);
+
+router.post("/space", SpaceController.create);
+router.get("/spaces/project/:projectId", SpaceController.getAllByProjectId);
+router.get("/space/:id", SpaceController.getById);
+router.put("/space/:id", SpaceController.update);
+router.delete("/space/:id", SpaceController.remove);
 
 router.get("/auth/github/login", GithubController.redirectToGithub);
 router.get("/auth/github/callback", GithubController.githubCallback);

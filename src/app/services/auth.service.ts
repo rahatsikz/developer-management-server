@@ -6,6 +6,7 @@ import httpStatus from "http-status";
 import { jwtHelpers } from "../../helpers/jwtHelpers";
 import config from "../../config";
 import { Secret } from "jsonwebtoken";
+import { User } from "@prisma/client";
 const requestCode = async (email: string) => {
   const code = crypto.randomBytes(3).toString("hex");
   const expires = new Date(Date.now() + 5 * 60_000);
@@ -31,12 +32,34 @@ const verifyCode = async (email: string, code: string, companyId: string) => {
   await prisma.magicCode.delete({ where: { email } });
 
   let user = await prisma.user.findUnique({ where: { email } });
+  let userWithCompany = await prisma.user.findFirst({
+    where: {
+      email,
+      Company: {
+        some: {
+          id: companyId,
+        },
+      },
+    },
+  });
+
+  if (user && !userWithCompany) {
+    user = await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        Company: {
+          connect: { id: companyId },
+        },
+      },
+    });
+  }
+
   if (!user) {
     user = await prisma.user.create({
       data: {
         email,
         ...(companyId && {
-          company: {
+          Company: {
             connect: { id: companyId },
           },
         }),
@@ -68,6 +91,11 @@ const inviteEmployee = async (emails: string[], companyId: string) => {
       email: {
         in: emails,
       },
+      Company: {
+        some: {
+          id: companyId,
+        },
+      },
     },
     select: {
       email: true,
@@ -88,4 +116,23 @@ const inviteEmployee = async (emails: string[], companyId: string) => {
   };
 };
 
-export const AuthService = { requestCode, verifyCode, inviteEmployee };
+// get user by id
+const getUserById = async (id: string) => {
+  return prisma.user.findUnique({ where: { id } });
+};
+
+// update user profile
+const updateUserProfile = async (
+  id: string,
+  payload: Partial<User>
+): Promise<User> => {
+  return prisma.user.update({ where: { id }, data: payload });
+};
+
+export const AuthService = {
+  requestCode,
+  verifyCode,
+  inviteEmployee,
+  getUserById,
+  updateUserProfile,
+};

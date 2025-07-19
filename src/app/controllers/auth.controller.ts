@@ -94,9 +94,45 @@ const inviteEmployee = (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const getProfile = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const id = (req.user as any).id;
+    const result = await AuthService.getUserById(id);
+    res.status(httpStatus.OK).json({
+      statusCode: httpStatus.OK,
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const updateUserProfile = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const id = (req.user as any).id;
+    const payload = req.body;
+    const updatedUser = await AuthService.updateUserProfile(id, payload);
+    res.status(httpStatus.OK).json({
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Profile updated successfully",
+      data: updatedUser,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const AuthController = {
   requestCode,
   verifyCode,
   logout,
   inviteEmployee,
+  getProfile,
+  updateUserProfile,
 };

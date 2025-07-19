@@ -38,6 +38,7 @@ model Project {
   company   Company  @relation(fields: [companyId], references: [id])
   companyId String
   users     User[]   @relation("members")
+  Spaces    Space[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -47,8 +48,11 @@ model Space {
   name      String
   repo      Repository?
   tasks     Task[]
+  members   User[]      @relation("SpaceMembers")
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
+  project   Project?    @relation(fields: [projectId], references: [id])
+  projectId String?
 }
 
 /// Users in the system
@@ -58,12 +62,13 @@ model User {
   name      String?
   avatarUrl String?
   role      UserRole      @default(MEMBER)
-  company   Company[]     @relation("CompanyUsers")
+  Company   Company[]     @relation("CompanyUsers")
   prs       PullRequest[]
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
   Task      Task[]
   Project   Project[]     @relation("members")
+  Spaces    Space[]       @relation("SpaceMembers")
 }
 
 enum UserRole {
