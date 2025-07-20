@@ -6,6 +6,7 @@ import { GithubController } from "../../controllers/github.controller";
 import { RepositoryController } from "../../controllers/repository.controller";
 import { authenticate } from "../../middlewares/auth";
 import { SpaceController } from "../../controllers/space.controller";
+import { TaskController } from "../../controllers/task.controller";
 
 const router = Express.Router();
 
@@ -33,6 +34,10 @@ router.get("/spaces/project/:projectId", SpaceController.getAllByProjectId);
 router.get("/space/:id", SpaceController.getById);
 router.put("/space/:id", SpaceController.update);
 router.delete("/space/:id", SpaceController.remove);
+
+router.post("/task", TaskController.create);
+router.put("/task/:id", TaskController.update);
+router.get("/tasks/space/:spaceId", TaskController.getAllBySpaceId);
 
 router.get("/auth/github/login", GithubController.redirectToGithub);
 router.get("/auth/github/callback", GithubController.githubCallback);
