@@ -7,6 +7,7 @@ import { RepositoryController } from "../../controllers/repository.controller";
 import { authenticate } from "../../middlewares/auth";
 import { SpaceController } from "../../controllers/space.controller";
 import { TaskController } from "../../controllers/task.controller";
+import { ChatController } from "../../controllers/chat.controller";
 
 const router = Express.Router();
 
@@ -42,6 +43,15 @@ router.get("/tasks/space/:spaceId", TaskController.getAllBySpaceId);
 router.post("/task/:taskId/comment", TaskController.createComment);
 router.post("/task/:taskId/subtask", TaskController.createSubTask);
 router.put("/task/subtask/:id", TaskController.updateSubTask);
+
+router.post("/spaces/:spaceId/chats", authenticate, ChatController.createChat);
+router.get("/spaces/:spaceId/chats", authenticate, ChatController.fetchChats);
+router.get(
+  "/chats/:chatId/messages",
+  authenticate,
+  ChatController.fetchMessages
+);
+router.post("/chats/:chatId/messages", ChatController.postMessage);
 
 router.get("/auth/github/login", GithubController.redirectToGithub);
 router.get("/auth/github/callback", GithubController.githubCallback);
