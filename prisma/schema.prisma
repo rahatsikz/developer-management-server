@@ -136,7 +136,7 @@ model Task {
   assignees   User[]        @relation("TaskAssignees")
   priority    TaskPriority?
   dueDate     DateTime?
-  status      TaskStatus?   @default(TODO)
+  status      TaskStatus?   @default(TO_DO)
   Comments    Comment[]
   description String?
   space       Space         @relation(fields: [spaceId], references: [id])
@@ -145,13 +145,15 @@ model Task {
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   SubTasks    SubTask[]
+  order       Int           @default(autoincrement())
 }
 
 model SubTask {
   id        String        @id @default(cuid())
   title     String
   assignees User[]        @relation("SubTaskAssignees")
-  status    TaskStatus    @default(TODO)
+  dueDate   DateTime?
+  status    TaskStatus    @default(TO_DO)
   priority  TaskPriority?
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
@@ -171,7 +173,7 @@ model Comment {
 }
 
 enum TaskStatus {
-  TODO
+  TO_DO
   IN_PROGRESS
   COMPLETE
 }

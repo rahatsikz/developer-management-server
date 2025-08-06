@@ -20,7 +20,7 @@ const getSpacesByProjectId = async (projectId: string) => {
 const getSpaceById = async (id: string) => {
   return prisma.space.findUnique({
     where: { id },
-    include: { project: true, members: true },
+    include: { project: true, members: true, tasks: true },
   });
 };
 

@@ -36,8 +36,12 @@ router.put("/space/:id", SpaceController.update);
 router.delete("/space/:id", SpaceController.remove);
 
 router.post("/task", TaskController.create);
+router.put("/task/reorder", TaskController.updateOrderByIndex);
 router.put("/task/:id", TaskController.update);
 router.get("/tasks/space/:spaceId", TaskController.getAllBySpaceId);
+router.post("/task/:taskId/comment", TaskController.createComment);
+router.post("/task/:taskId/subtask", TaskController.createSubTask);
+router.put("/task/subtask/:id", TaskController.updateSubTask);
 
 router.get("/auth/github/login", GithubController.redirectToGithub);
 router.get("/auth/github/callback", GithubController.githubCallback);

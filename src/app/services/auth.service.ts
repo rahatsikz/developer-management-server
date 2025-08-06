@@ -118,7 +118,18 @@ const inviteEmployee = async (emails: string[], companyId: string) => {
 
 // get user by id
 const getUserById = async (id: string) => {
-  return prisma.user.findUnique({ where: { id } });
+  return prisma.user.findUnique({
+    where: { id },
+    include: {
+      Spaces: {
+        include: {
+          members: true,
+          project: true,
+        },
+      },
+      Project: true,
+    },
+  });
 };
 
 // update user profile
