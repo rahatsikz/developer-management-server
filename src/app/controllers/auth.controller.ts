@@ -30,10 +30,12 @@ const verifyCode = async (req: Request, res: Response, next: NextFunction) => {
     res.cookie("access_token", result.accessToken, {
       httpOnly: true,
       secure: true,
+      sameSite: "none",
     });
     res.cookie("refresh_token", result.refreshToken, {
       httpOnly: true,
       secure: true,
+      sameSite: "none",
     });
 
     res.status(httpStatus.OK).json({

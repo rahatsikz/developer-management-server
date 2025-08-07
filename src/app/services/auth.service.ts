@@ -43,7 +43,7 @@ const verifyCode = async (email: string, code: string, companyId: string) => {
     },
   });
 
-  if (user && !userWithCompany) {
+  if (user && !userWithCompany && companyId) {
     user = await prisma.user.update({
       where: { id: user.id },
       data: {
