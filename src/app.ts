@@ -6,6 +6,8 @@ import httpStatus from "http-status";
 import routes from "./app/routes/v1";
 import session from "express-session";
 import config from "./config";
+import pgSession from "connect-pg-simple";
+import { pool } from "./db";
 
 const app: Application = express();
 
@@ -20,8 +22,11 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const PgSession = pgSession(session);
+
 app.use(
   session({
+    store: new PgSession({ pool }),
     name: "dms.sid", // cookie name
     secret: config.session_secret!,
     resave: false, // only save when session is modified
