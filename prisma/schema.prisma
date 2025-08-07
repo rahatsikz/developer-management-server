@@ -58,22 +58,23 @@ model Space {
 
 /// Users in the system
 model User {
-  id        String        @id @default(cuid())
-  email     String        @unique
-  name      String?
-  avatarUrl String?
-  role      UserRole      @default(MEMBER)
-  Company   Company[]     @relation("CompanyUsers")
-  prs       PullRequest[]
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-  Tasks     Task[]        @relation("TaskAssignees")
-  Project   Project[]     @relation("members")
-  Spaces    Space[]       @relation("SpaceMembers")
-  Comments  Comment[]
-  SubTasks  SubTask[]     @relation("SubTaskAssignees")
-  Chats     Chat[]
-  Messages  Message[]
+  id           String        @id @default(cuid())
+  email        String        @unique
+  name         String?
+  avatarUrl    String?
+  role         UserRole      @default(MEMBER)
+  Company      Company[]     @relation("CompanyUsers")
+  prs          PullRequest[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  Tasks        Task[]        @relation("TaskAssignees")
+  Project      Project[]     @relation("members")
+  Spaces       Space[]       @relation("SpaceMembers")
+  Comments     Comment[]
+  SubTasks     SubTask[]     @relation("SubTaskAssignees")
+  Chats        Chat[]
+  Messages     Message[]
+  seenMessages Message[]     @relation("SeenMessages")
 }
 
 // chats
@@ -96,6 +97,7 @@ model Message {
   chatId    String
   sender    User     @relation(fields: [senderId], references: [id])
   senderId  String
+  seenBy    User[]   @relation("SeenMessages")
 }
 
 enum UserRole {

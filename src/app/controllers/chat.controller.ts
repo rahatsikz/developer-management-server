@@ -73,9 +73,28 @@ const createChat = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const seenMessage = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { messageIds } = req.body;
+    const profileId = (req.user as any).id;
+
+    const result = await ChatService.seenMessages(messageIds, profileId);
+
+    res.status(httpStatus.CREATED).json({
+      statusCode: httpStatus.CREATED,
+      success: true,
+      message: "Messages seen successfully",
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const ChatController = {
   fetchChats,
   fetchMessages,
   postMessage,
   createChat,
+  seenMessage,
 };

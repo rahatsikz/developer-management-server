@@ -3,7 +3,6 @@ import { AuthController } from "../../controllers/auth.controller";
 import { CompanyController } from "../../controllers/company.controller";
 import { ProjectController } from "../../controllers/project.controller";
 import { GithubController } from "../../controllers/github.controller";
-import { RepositoryController } from "../../controllers/repository.controller";
 import { authenticate } from "../../middlewares/auth";
 import { SpaceController } from "../../controllers/space.controller";
 import { TaskController } from "../../controllers/task.controller";
@@ -52,11 +51,13 @@ router.get(
   ChatController.fetchMessages
 );
 router.post("/chats/:chatId/messages", ChatController.postMessage);
+router.put(
+  "/chats/:chatId/messages/seen",
+  authenticate,
+  ChatController.seenMessage
+);
 
 router.get("/auth/github/login", GithubController.redirectToGithub);
 router.get("/auth/github/callback", GithubController.githubCallback);
-
-router.post("/repository", RepositoryController.create);
-router.get("/repository/:id", RepositoryController.getOne);
 
 export default router;
