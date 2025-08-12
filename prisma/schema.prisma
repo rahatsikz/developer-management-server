@@ -106,6 +106,15 @@ enum UserRole {
   MEMBER
 }
 
+/// Session table for connect-pg-simple
+model session {
+  sid    String   @id @db.VarChar(255)
+  sess   Json
+  expire DateTime @db.Timestamp(6)
+
+  @@index([expire], name: "IDX_session_expire")
+}
+
 /// GitHub repository linked to a project
 model Repository {
   id           String        @id @default(cuid())
