@@ -50,6 +50,9 @@ router.get(
   authenticate,
   ChatController.fetchMessages
 );
+
+router.get("/messages/:id", authenticate, ChatController.getMessageById);
+
 router.post("/chats/:chatId/messages", ChatController.postMessage);
 router.put(
   "/chats/:chatId/messages/seen",

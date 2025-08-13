@@ -55,6 +55,25 @@ const postMessage = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
+const getMessageById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const { id } = req.params;
+    const chats = await ChatService.getMessageById(id);
+    res.status(httpStatus.OK).json({
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Message fetched successfully",
+      data: chats,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // create chat
 const createChat = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -97,4 +116,5 @@ export const ChatController = {
   postMessage,
   createChat,
   seenMessage,
+  getMessageById,
 };

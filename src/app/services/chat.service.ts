@@ -10,13 +10,21 @@ const createChat = async (spaceId: string, userIds: string[]) => {
   });
 };
 const getChatsBySpace = async (spaceId: string, userId: string) => {
-  return prisma.chat.findMany({
+  const chats = await prisma.chat.findMany({
     where: { spaceId, users: { some: { id: userId } } },
     include: {
       users: true,
       Message: { orderBy: { createdAt: "asc" }, include: { seenBy: true } },
     },
   });
+
+  chats.sort((a, b) => {
+    const lastA = a.Message[a.Message.length - 1]?.createdAt ?? 0;
+    const lastB = b.Message[b.Message.length - 1]?.createdAt ?? 0;
+    return new Date(lastB).getTime() - new Date(lastA).getTime();
+  });
+
+  return chats;
 };
 
 const getMessagesByChat = async (chatId: string) => {
@@ -41,6 +49,16 @@ const createMessage = async (
   });
 };
 
+// get message by id
+const getMessageById = async (id: string) => {
+  return prisma.message.findUnique({
+    where: { id },
+    include: {
+      seenBy: true,
+    },
+  });
+};
+
 const seenMessages = async (messageIds: string[], userId: string) => {
   const updates = messageIds.map((id) =>
     prisma.message.update({
@@ -49,6 +67,9 @@ const seenMessages = async (messageIds: string[], userId: string) => {
         seenBy: {
           connect: { id: userId },
         },
+      },
+      include: {
+        seenBy: true,
       },
     })
   );
@@ -62,4 +83,5 @@ export const ChatService = {
   createMessage,
   createChat,
   seenMessages,
+  getMessageById,
 };

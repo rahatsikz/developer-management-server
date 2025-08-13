@@ -19,9 +19,37 @@ export default function registerChatHandlers(io: IOServer) {
             payload.userId,
             payload.content
           );
+
           io.to(payload.chatId).emit("newMessage", message);
+
+          io.emit("newMessageGlobal", message);
         } catch (err) {
           console.error("Error handling sendMessage:", err);
+        }
+      }
+    );
+
+    socket.on(
+      "messageSeen",
+      async (payload: {
+        chatId: string;
+        messageIds: string[];
+        userId: string;
+      }) => {
+        try {
+          // Mark messages as seen in DB
+          const updatedMessages = await ChatService.seenMessages(
+            payload.messageIds,
+            payload.userId
+          );
+
+          // Notify all clients in the chat except the one who just saw
+          socket.to(payload.chatId).emit("messageSeen", {
+            chatId: payload.chatId,
+            messages: updatedMessages,
+          });
+        } catch (err) {
+          console.error("Error handling messageSeen:", err);
         }
       }
     );

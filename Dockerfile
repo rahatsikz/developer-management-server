@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Copy only what's needed for install
 COPY package.json ./
-RUN npm ci --only=production
+# RUN npm ci --only=production
 COPY prisma ./prisma     
 RUN npm install
 
