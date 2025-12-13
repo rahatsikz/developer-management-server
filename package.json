@@ -8,6 +8,7 @@
     "start": "node dist/server.js",
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "push:prisma": "docker compose exec backend npx prisma db push",
     "postinstall": "prisma generate"
   },
   "keywords": [],

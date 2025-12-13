@@ -1,22 +1,26 @@
-version: "3.8"
+version: '3.8'
 
 services:
   backend:
     build: .
     ports:
-      - "5000:5000"
-      - "5555:5555"
+      - '5000:5000'
+      - '5555:5555'
     env_file:
       - .env
     depends_on:
       - postgres
-    restart: always
+    # restart: always
+    restart: 'no'
     networks:
       - app-network
 
   postgres:
     image: postgres:15
-    restart: always
+    ports:
+      - '5432:5432'
+    # restart: always
+    restart: 'no'
     environment:
       POSTGRES_USER: rahat
       POSTGRES_PASSWORD: postgres
